@@ -1,0 +1,68 @@
+def randomPrimes (pbit , qbit) :
+  # Choosing large primes
+  # 512 <= pbit <= 1024 and multiple of 64
+  p = random_prime ( 2^pbit , proof=True , lbound=2^(pbit-1) )
+  q = random_prime ( 2^qbit , proof=True , lbound=2^(qbit-1) )
+  # q must be prime divisor of p
+  if is_prime(p) and is_prime(q) : return p,q
+  else : randomPrimes(640,160)
+  #   The algorithm parameters (p, q, g) may be shared between different users of the system. 
+def integers (p , q) :
+# The signer selects a random secret integer k
+  h = Integer ( 1 , p-1 )
+  # h is any integer 1 < h < (p-1) 
+  g = ( ( h ^ ( (p-1) / q ) ) % p)
+  k = randint ( 0 , q )
+  return h,g,k
+  # Creating a new per-message key
+  #   Parameters x and k are used for signature generation only, and must be kept secret.
+  #   Parameter k must be regenerated for each signature
+def private_key (q) : # Generate a private key
+  # The private key is used in the signature generation process 
+  x = randint ( 1 , q+1 )
+  return x
+def public_key (x , g , p) : # Generate a public key
+  # The public key is used in the signature verification process
+  y = ( g^x ) % p
+  return y
+def getMessage () : 
+  # Read the file to sign 
+  myFile = open ( "/home/EmreOvunc/Desktop/Message.txt" , "r" )
+  # Opens file with name of "Text.txt"
+  Message = myFile.read() 
+  print "<<< Message >>>\n\n" , Message , "\n<<< End of The Message >>>\n"
+  myFile.close()
+  return Message
+  # Read text file and print it and then return message
+  def signature_signing (p , q , g , k , Message , x) : 
+  # Computes signature pair
+  r = ( ( g^k ) % p ) % q
+  s = ( ( k^1 ) * ( hash ( Message ) + x * r ) ) % q
+  signed_document(s)
+  # Signature = ( r , s ) 
+  return s,r 
+def signed_document(s) :
+  # Write file to signed document
+  signedFile = open ( "/home/EmreOvunc/Desktop/Sign.txt" , "w+")
+  signedFile.write(str(s))
+  signedFile.close()
+  def signature_verification (s , r , Message , p , q , publicKey , g) :  
+  w = ( s^-1 ) % q
+  u1 = ( hash ( Message ) * w ) % q
+  # Convert message to hash value
+  u2 = ( r*w ) % q
+  v = ( ( (g^u1) * ((publicKey)^u2) ) % p ) % q
+  if v==r : print "The signature is verified !"
+  else: print "The signature is not verified!"
+  # if v = r, then the signature is verified and the verifier can have high confidence that the 
+  #received 
+  #    DSA is similar to the ElGamal signature scheme
+def main () : 
+  p,q = randomPrimes (640,160)
+  h,g,k = integers (p,q)
+  privateKey = private_key (q)
+  publicKey = public_key (privateKey,g,p)
+  messageI = getMessage ()
+  s,r = signature_signing (p,q,g,k,messageI,privateKey)
+  signature_verification (s,r,messageI,p,q,publicKey,g)
+main ()
